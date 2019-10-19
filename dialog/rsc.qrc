@@ -1,0 +1,36 @@
+<RCC>
+  <qresource prefix="File">
+    <file>resources/icons8-pictures-folder-48.png</file>
+    <file>resources/icons8-save-all-50.png</file>
+    <file>resources/icons8-close-window-50-2.png</file>
+    <file>resources/icons8-file-48.png</file>
+    <file>resources/icons8-opened-folder-50-3.png</file>
+    <file>resources/icons8-save-50-4.png</file>
+    <file>resources/icons8-save-as-50.png</file>
+  </qresource>
+  <qresource prefix="Question">
+    <file>resources/icons8-help-32.png</file>
+  </qresource>
+  <qresource prefix="Image">
+    <file>resources/icons8-cursor-50.png</file>
+    <file>resources/icons8-accuracy-50.png</file>
+    <file>resources/icons8-hunt-50.png</file>
+    <file>resources/icons8-polygon-50.png</file>
+    <file>resources/icons8-move-50.png</file>
+    <file>resources/icons8-zoom-in-50.png</file>
+    <file>resources/icons8-zoom-out-50.png</file>
+    <file>resources/icons8-zoom-to-actual-size-50.png</file>
+  </qresource>
+  <qresource prefix="Object">
+    <file>resources/icons8-image-file-80.png</file>
+    <file>resources/icons8-add-50-2.png</file>
+    <file>resources/icons8-back-arrow-50.png</file>
+    <file>resources/icons8-cancel-50.png</file>
+    <file>resources/icons8-edit-50-2.png</file>
+    <file>resources/icons8-folder-50.png</file>
+    <file>resources/icons8-forward-button-50-3.png</file>
+  </qresource>
+  <qresource prefix="Program">
+    <file>resources/icons8-play-64.png</file>
+  </qresource>
+</RCC>
