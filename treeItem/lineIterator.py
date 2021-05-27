@@ -73,3 +73,5 @@ def createLineIterator(P1, P2, img):
     itbuffer[:,2] = img[itbuffer[:,1].astype(np.uint),itbuffer[:,0].astype(np.uint)]
 
     return itbuffer
+
+# Credit to: https://stackoverflow.com/questions/32328179/opencv-3-0-lineiterator
