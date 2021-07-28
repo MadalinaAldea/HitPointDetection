@@ -1,5 +1,6 @@
-from treeItem.lineIterator import createLineIterator
-from treeItem.lineIterator import createLineIterator as create_line
+# from treeItem.lineIterator import createLineIterator
+# from treeItem.lineIterator import createLineIterator as create_line
+from targetDetector import *
 
 import cv2
 import numpy as np
@@ -14,21 +15,29 @@ def createScoreRingDetector(src, bullseye):
 
     return scoreRings
     
-def createScoreRingSimulator(bullseye):
-    bOrigo, bSize, bAngle = bullseye
-    size = list(__mm(bSize, 25, 25))
-    width = __mm(bSize, 25, 25)
+def createScoreRingSimulator(bullseye): # Not used, it just simulates the score rings as ellipses, can be used for the situation when no circle is detected
+    # print("Bulls eye", bullseye)
+    bOrigo, bSize, bAngle = bullseye # the ellipse which approximates the bulls eye
+    size = list(__mm(bSize, 25, 25))# bSize - width and height of the bulls  eye, they are reduced with 1/8 (*(25/200)) -list
+    # print("Size", size)
+    width = __mm(bSize, 25, 25) # the width is the size of the bulls eye, reduced by 1/8 - tuple
     score = 10
     
-    ellipses = []
-    ellipses.append((bOrigo, size, bAngle))
-    size = list(__mm(bSize, 50, 50))
+    ellipses = [] #list of ellipses for each circle
+    ellipses.append((bOrigo, size, bAngle)) # first one is the center of the target
+    # print("Ellipses", ellipses)
+    size = list(__mm(bSize, 50, 50)) # bulls eye size reduced with 1/4
     
-    for _ in range(11):
-        ellipses.append((bOrigo, size.copy(), bAngle))
+    for _ in range(11): # 11 rings in total
+        ellipses.append((bOrigo, size.copy(), bAngle)) 
+        # print("ellips", ellipses)
 
         for i, meas in enumerate(__mm(bSize, 50, 50)):
+            # print("__mm(bSize, 50, 50)",__mm(bSize, 50, 50))
+            # print("Meas",meas)
+            # print("size[i]",size[i])
             size[i] += meas
+            # print("Size+meas", size[i])
         score -= 1
         width = __mm(bSize, 50, 50)
 
@@ -38,10 +47,10 @@ def createScoreRingSimulator(bullseye):
 
 def __outerRings(src, bullseye):
     # Hitta poängringar utanför riktpricken och returnera en lista med ring 1-6
-    height, width, _ = src.shape
+    height, width, _ = src.shape 
     origo = tuple(map(int, bullseye[0]))
 
-    roi = __regionOfInterest(src, bullseye)
+    roi = __regionOfInterest(src, bullseye) 
     bil_filt = cv2.bilateralFilter(roi, 5, 150, 150)
     gray = cv2.cvtColor(bil_filt, cv2.COLOR_BGR2GRAY)
     cnts_mask = np.zeros_like(gray)
@@ -59,6 +68,9 @@ def __outerRings(src, bullseye):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, shape)
 
     adp_thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, blocksize, C)
+    cv2.imshow("adp", adp_thresh)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
     fg_thresh = cv2.morphologyEx(adp_thresh, cv2.MORPH_OPEN, kernel, iterations=1)
     comp_thresh = cv2.compare(adp_thresh, fg_thresh, cv2.CMP_GT)
     cv2.line(comp_thresh, origo, (0,0), 0, 10)
@@ -202,8 +214,10 @@ def __regionOfInterest(src, bullseye):
     roi = (bOrigo, (bWidth*1.1, bHeight*1.1), bAngle)
 
     cv2.ellipse(mask, roi, (255, 255, 255), -1)
+    # cv2.imshow("mask", cv2.resize(mask,(960,540)))
     mask = cv2.bitwise_not(mask)
     masked_image = cv2.bitwise_and(src, mask)
+    cv2.imshow("mask", cv2.resize(mask,(960,540)))
 
     return masked_image
 
@@ -220,3 +234,71 @@ def __convexHull(contours):
     return pts
 
     
+print(len(createScoreRingSimulator(((1595.2835693359375, 1656.805419921875), (1019.6914672851562, 1034.4603271484375), 169.2474822998047))))
+image = cv2.imread("Exempel2.jpg")
+mask = np.zeros_like(image)
+# cv2.imshow("mask",mask)
+# cv2.waitKey(0)
+
+ellipses = createScoreRingSimulator(((1595.2835693359375, 1656.805419921875), (1019.6914672851562, 1034.4603271484375), 169.2474822998047))
+for elipse in ellipses:
+    elipse=list(elipse)
+    elipse[0]=list(elipse[0])
+    
+    elipse[0][0]=int(elipse[0][0])
+    elipse[0][1]=int(elipse[0][1])
+    elipse[1][0]=int(elipse[1][0])
+    elipse[1][1]=int(elipse[1][1])
+
+ 
+    elipse[0]=tuple(elipse[0])
+    elipse[1]=tuple(elipse[1])
+    elipse=tuple(elipse)
+
+    #Feed elps directly into cv2.ellipse
+    cv2.ellipse(mask,elipse,(0,0,255))
+# cv2.imshow("Perfectly fitted ellipses", cv2.resize(mask,(960,540)))
+# cv2.waitKey(0)
+
+img = cv2.imread("test.jpg")
+roi_target, bulleye=createTargetDetector(img)
+print("bulle", bulleye)
+# cv2.imshow("roi", cv2.resize(roi,(960,540)))
+# cv2.waitKey()
+# cv2.resize(img,(960,540))
+# bullseye=((1779.245361328125, 3438.119873046875), (1816.6043701171875, 4025.163818359375), 82.88785552978516)
+def outerRings(src, bullseye):
+    # Hitta poängringar utanför riktpricken och returnera en lista med ring 1-6
+    height, width, _ = src.shape 
+    origo = tuple(map(int, bullseye[0]))
+
+    roi = __regionOfInterest(src, bullseye) 
+    bil_filt = cv2.bilateralFilter(roi, 5, 150, 150)
+    gray = cv2.cvtColor(bil_filt, cv2.COLOR_BGR2GRAY)
+    cnts_mask = np.zeros_like(gray)
+
+    
+    # Threshhold process
+    blocksize = int(height/30)
+    if blocksize % 2 == 0:
+        blocksize += 1
+    C = blocksize/4
+    mean = np.mean(gray[np.nonzero(gray)])
+    shape = (5,5)
+    if mean >= 190:
+        shape = (7,7)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, shape)
+
+    adp_thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, blocksize, C)
+    fg_thresh = cv2.morphologyEx(adp_thresh, cv2.MORPH_OPEN, kernel, iterations=1)
+    comp_thresh = cv2.compare(adp_thresh, fg_thresh, cv2.CMP_GT)
+    cv2.imshow("adp_thresh",cv2.resize(comp_thresh ,(960,540)))
+    cv2.waitKey(0)
+    cv2.line(comp_thresh, origo, (0,0), 0, 10)
+    return gray
+
+# roi2 =__regionOfInterest(img, bullseye)
+bil_filt = outerRings(roi_target, bulleye)
+# numpy_horizontal = np.hstack((roi, bil_filt))
+cv2.imshow("t",cv2.resize(bil_filt,(960,540)))
+cv2.waitKey(0)
